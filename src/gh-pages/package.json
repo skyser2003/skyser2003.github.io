@@ -4,11 +4,11 @@
   "private": true,
   "scripts": {
     "dev": "vite",
-    "build": "run-p type-check build-only",
+    "build": "npm run build-rust && run-p type-check build-only",
     "build-rust": "cd ../rust && wasm-pack build --target web && shx cp -r pkg/ ../gh-pages/src/models/pkg/",
     "preview": "vite preview",
     "test:unit": "vitest",
-    "build-only": "npm run build-rust && vite build",
+    "build-only": "vite build",
     "type-check": "vue-tsc --noEmit -p tsconfig.vitest.json --composite false",
     "lint": "eslint . --ext .vue,.js,.jsx,.cjs,.mjs,.ts,.tsx,.cts,.mts --fix --ignore-path .gitignore",
     "format": "prettier --write src/"
