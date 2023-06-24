@@ -10,8 +10,10 @@ pub fn add(left: usize, right: usize) -> usize {
 }
 
 #[wasm_bindgen]
-pub fn greet(name: &str) {
-    alert(&format!("Hello, {}!", name));
+pub fn greet(name: &str) -> String {
+    let result = &format!("Hello, {}!", name);
+
+    result.clone()
 }
 
 #[cfg(test)]

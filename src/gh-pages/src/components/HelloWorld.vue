@@ -1,11 +1,18 @@
 <script setup lang="ts">
+import init, { greet } from "../models/pkg/gh_pages_rust"
+
 defineProps<{
   msg: string
 }>()
+
+await init();
+
 </script>
 
 <template>
   <div class="greetings">
+    <div>{{ greet("skyser2003") }}</div>
+
     <h1 class="green">{{ msg }}</h1>
     <h3>
       You’ve successfully created a project with
