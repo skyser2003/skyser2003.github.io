@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import init, { greet } from "../models/pkg/gh_pages_rust"
+import init, { greet } from "../models/pkg/gh_pages_rust.js"
 
 defineProps<{
   msg: string
