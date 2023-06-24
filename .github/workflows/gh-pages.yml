@@ -50,8 +50,10 @@ jobs:
                   node-version: 18
                   cache: "npm"
                   cache-dependency-path: ${{ env.SOURCE_DIR }}/package-lock.json
-            - name: Install dependencies
+            - name: Install dependencies (node)
               run: npm install
+            - name: Install dependencies (rust)
+              run: cargo install --path ${{ env.RUST_DIR }} && cargo install wasm-pack
             - name: Build
               run: npm run build
             - name: Setup Pages
