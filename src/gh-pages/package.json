@@ -5,7 +5,7 @@
   "scripts": {
     "dev": "vite",
     "build": "npm run build-rust && run-p type-check build-only",
-    "build-rust": "cd ../rust && wasm-pack build --target web && shx cp -r pkg/ ../gh-pages/src/models/pkg/",
+    "build-rust": "cd ../rust && wasm-pack build --target web && shx mkdir -p ../gh-pages/src/models/pkg/ && shx cp -r pkg/ ../gh-pages/src/models/pkg/",
     "preview": "vite preview",
     "test:unit": "vitest",
     "build-only": "vite build",
@@ -28,6 +28,7 @@
     "@vue/eslint-config-typescript": "^11.0.3",
     "@vue/test-utils": "^2.3.2",
     "@vue/tsconfig": "^0.4.0",
+    "cross-env": "^7.0.3",
     "eslint": "^8.39.0",
     "eslint-plugin-vue": "^9.11.0",
     "jsdom": "^22.1.0",
