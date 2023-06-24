@@ -53,7 +53,7 @@ jobs:
             - name: Install dependencies (node)
               run: npm install
             - name: Install dependencies (rust)
-              run: cd ${{ env.RUST_DIR }} && cargo install && cargo install wasm-pack
+              run: cargo install wasm-pack
             - name: Build
               run: npm run build
             - name: Setup Pages
