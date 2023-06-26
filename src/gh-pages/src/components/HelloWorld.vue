@@ -1,12 +1,11 @@
 <script setup lang="ts">
-import init, { greet } from "../models/pkg/gh_pages_rust.js"
+import init, { greet } from "../models/pkg/gh_pages_rust.js";
 
 defineProps<{
-  msg: string
-}>()
+  msg: string;
+}>();
 
 await init();
-
 </script>
 
 <template>
