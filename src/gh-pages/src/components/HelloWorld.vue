@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import init, { greet } from "../models/pkg/gh_pages_rust.js";
+import lm from "../models/language/lang_manager";
 
 defineProps<{
   msg: string;
@@ -10,14 +11,10 @@ await init();
 
 <template>
   <div class="greetings">
-    <div>{{ greet("skyser2003") }}</div>
-
-    <h1 class="green">{{ msg }}</h1>
-    <h3>
-      You’ve successfully created a project with
-      <a href="https://vitejs.dev/" target="_blank" rel="noopener">Vite</a> +
-      <a href="https://vuejs.org/" target="_blank" rel="noopener">Vue 3</a>. What's next?
-    </h3>
+    <h1 class="green">{{ lm.getData("name") }}</h1>
+    <h3>{{ lm.getData("mlops") }}</h3>
+    <h3>{{ lm.getData("ai_engineer") }}</h3>
+    <h3>{{ lm.getData("web_backend_developer") }}</h3>
   </div>
 </template>
 
