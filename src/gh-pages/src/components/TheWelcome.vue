@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import WelcomeItem from "./WelcomeItem.vue";
 import DocumentationIcon from "./icons/IconDocumentation.vue";
+import GitHubIcon from "./icons/IconGitHub.vue";
 import ToolingIcon from "./icons/IconTooling.vue";
 import EcosystemIcon from "./icons/IconEcosystem.vue";
 import CommunityIcon from "./icons/IconCommunity.vue";
@@ -10,13 +11,10 @@ import SupportIcon from "./icons/IconSupport.vue";
 <template>
   <WelcomeItem>
     <template #icon>
-      <DocumentationIcon />
+      <GitHubIcon />
     </template>
-    <template #heading>Documentation</template>
-
-    Vue’s
-    <a href="https://vuejs.org/" target="_blank" rel="noopener">official documentation</a>
-    provides you with all information you need to get started.
+    <template #heading>GitHub</template>
+    <a href="https://github.com/skyser2003" target="_blank" rel="noopener">GitHub profile</a>
   </WelcomeItem>
 
   <WelcomeItem>
