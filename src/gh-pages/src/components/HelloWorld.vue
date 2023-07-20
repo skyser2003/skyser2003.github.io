@@ -15,6 +15,8 @@ await init();
     <h3>{{ lm.getData("mlops") }}</h3>
     <h3>{{ lm.getData("ai_engineer") }}</h3>
     <h3>{{ lm.getData("web_backend_developer") }}</h3>
+    <br/>
+    <h3>Contact: <a href="mailto:shjang1992@gmail.com">shjang1992@gmail.com</a></h3>
   </div>
 </template>
 
