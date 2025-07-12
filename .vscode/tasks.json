@@ -1,0 +1,17 @@
+{
+    "version": "2.0.0",
+    "tasks": [
+        {
+            "label": "Rust: build wasm",
+            "type": "shell",
+            "command": "npm run build-rust",
+            "group": {
+                "kind": "build"
+            },
+            "problemMatcher": ["$rustc"],
+            "options": {
+                "cwd": "${workspaceFolder}/src/gh-pages"
+            }
+        }
+    ]
+}

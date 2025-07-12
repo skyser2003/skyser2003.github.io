@@ -61,8 +61,8 @@ jobs:
             - name: Upload artifact
               uses: actions/upload-pages-artifact@v1
               with:
-                  # Upload dist repository
-                  path: "${{ env.SOURCE_DIR }}/dist"
+                  # Upload out repository
+                  path: "${{ env.SOURCE_DIR }}/out"
             - name: Deploy to GitHub Pages
               id: deployment
               uses: actions/deploy-pages@v1
