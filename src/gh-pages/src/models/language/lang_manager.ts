@@ -14,6 +14,14 @@ class LanguageManager {
     public getData(key: string) {
         return this.uiLangData[key][this.lang];
     }
+
+    public setLanguage(lang: string) {
+        this.lang = lang;
+    }
+
+    public getLanguage() {
+        return this.lang;
+    }
 }
 
 let langCode = "en";

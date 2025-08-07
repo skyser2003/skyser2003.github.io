@@ -1,95 +1,207 @@
-import Image from "next/image";
+"use client";
+
+import * as React from "react";
 import styles from "./page.module.css";
+import Avatar from "@mui/material/Avatar";
+import {
+    createTheme,
+    CssBaseline,
+    Grid,
+    Link,
+    Paper,
+    ThemeProvider,
+} from "@mui/material";
+import { green } from "@mui/material/colors";
+import InitColorSchemeScript from "@mui/material/InitColorSchemeScript";
+
+import langManager from "@/models/language/lang_manager";
+
+let defaultTheme = createTheme({});
+
+defaultTheme = createTheme({
+    palette: {
+        primary: green,
+    },
+});
+
+const theme = createTheme({
+    colorSchemes: {
+        light: {
+            palette: {
+                primary: { main: defaultTheme.palette.primary.light },
+                background: {
+                    default: "#fafbfc",
+                    paper: "#fff",
+                },
+            },
+        },
+        dark: {
+            palette: {
+                primary: { main: defaultTheme.palette.primary.dark },
+                background: {
+                    default: "#181a1b",
+                    paper: "#23272b",
+                },
+            },
+        },
+    },
+    cssVariables: {
+        colorSchemeSelector: "class",
+    },
+    components: {
+        MuiCardContent: {
+            styleOverrides: {
+                root: {
+                    fontFamily: "DNFBitBitv2",
+                },
+            },
+        },
+        MuiTypography: {
+            styleOverrides: {
+                root: {
+                    fontFamily: "DNFBitBitv2",
+                },
+            },
+        },
+        MuiTableCell: {
+            styleOverrides: {
+                root: {
+                    fontFamily: "DNFBitBitv2",
+                },
+            },
+        },
+    },
+});
 
 export default function Home() {
-  return (
-    <div className={styles.page}>
-      <main className={styles.main}>
-        <Image
-          className={styles.logo}
-          src="/next.svg"
-          alt="Next.js logo"
-          width={180}
-          height={38}
-          priority
-        />
-        <ol>
-          <li>
-            Get started by editing <code>src/app/page.tsx</code>.
-          </li>
-          <li>Save and see your changes instantly.</li>
-        </ol>
+    const [language, setLanguage] = React.useState("");
 
-        <div className={styles.ctas}>
-          <a
-            className={styles.primary}
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className={styles.logo}
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={20}
-              height={20}
-            />
-            Deploy now
-          </a>
-          <a
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-            className={styles.secondary}
-          >
-            Read our docs
-          </a>
-        </div>
-      </main>
-      <footer className={styles.footer}>
-        <a
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/file.svg"
-            alt="File icon"
-            width={16}
-            height={16}
-          />
-          Learn
-        </a>
-        <a
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/window.svg"
-            alt="Window icon"
-            width={16}
-            height={16}
-          />
-          Examples
-        </a>
-        <a
-          href="https://nextjs.org?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/globe.svg"
-            alt="Globe icon"
-            width={16}
-            height={16}
-          />
-          Go to nextjs.org →
-        </a>
-      </footer>
-    </div>
-  );
+    if (language === "") {
+        setLanguage(langManager.getLanguage());
+    }
+
+    return (
+        <ThemeProvider theme={theme} defaultMode="system">
+            <InitColorSchemeScript defaultMode="system" attribute="class" />
+            <CssBaseline />
+            <div className={styles.page}>
+                <main className={styles.main}>
+                    <Grid container spacing={2}>
+                        <Grid
+                            container
+                            size={8}
+                            className={styles.roundedBorderCard}
+                            sx={{ backgroundColor: "background.paper" }}
+                        >
+                            <Grid size={8} className={styles.flexAlignCenter}>
+                                <Paper
+                                    elevation={3}
+                                    className={styles.profileCard}
+                                >
+                                    <Avatar
+                                        alt="skyser2003 github avatar"
+                                        src="https://avatars.githubusercontent.com/u/1083291?v=4"
+                                        className={styles.avatarLarge}
+                                    />
+                                    <span
+                                        style={{
+                                            fontWeight: 700,
+                                            fontSize: 22,
+                                        }}
+                                    >
+                                        {langManager.getData("name")}
+                                    </span>
+                                </Paper>
+                            </Grid>
+
+                            <Grid size={4} className={styles.flexColCenter}>
+                                <Paper
+                                    elevation={1}
+                                    className={styles.roleCard}
+                                >
+                                    <div style={{ fontWeight: 600 }}>
+                                        {langManager.getData(
+                                            "software_engineer"
+                                        )}
+                                    </div>
+                                    <div style={{ fontWeight: 600 }}>
+                                        {langManager.getData("mlops")}
+                                    </div>
+                                </Paper>
+                            </Grid>
+
+                            <Grid size={12}>
+                                <Paper
+                                    elevation={3}
+                                    className={styles.linkCard}
+                                >
+                                    <div>
+                                        <Link
+                                            href="https://github.com/skyser2003"
+                                            rel="noopener"
+                                            target="_blank"
+                                            sx={{ fontWeight: 600 }}
+                                        >
+                                            GitHub
+                                        </Link>
+                                    </div>
+                                    <div>
+                                        <Link
+                                            href="https://www.linkedin.com/in/skyser2003/"
+                                            rel="noopener"
+                                            target="_blank"
+                                            sx={{ fontWeight: 600 }}
+                                        >
+                                            LinkedIn
+                                        </Link>
+                                    </div>
+                                    <div>
+                                        <Link
+                                            href="https://onedrive.live.com/?cid=051065429517968a&id=051065429517968A!sf97af970a60940569b96e3831779c394&resid=051065429517968A!sf97af970a60940569b96e3831779c394&ithint=file,pdf&e=mrbR4m&migratedtospo=true&redeem=aHR0cHM6Ly8xZHJ2Lm1zL2IvYy8wNTEwNjU0Mjk1MTc5NjhhL0VYRDVldmtKcGxaQW01YmpneGQ1dzVRQi1nS3ZCTWZEd1k4QUhsUzY2YmdMdGc_ZT1tcmJSNG0"
+                                            rel="noopener"
+                                            target="_blank"
+                                            sx={{ fontWeight: 600 }}
+                                        >
+                                            Resume (English)
+                                        </Link>
+                                    </div>
+                                    <div>
+                                        <Link
+                                            href="https://onedrive.live.com/?cid=051065429517968a&id=051065429517968A!scbf91e998a5a472695310f3085383c35&resid=051065429517968A!scbf91e998a5a472695310f3085383c35&ithint=file,pdf&e=wsD0KH&migratedtospo=true&redeem=aHR0cHM6Ly8xZHJ2Lm1zL2IvYy8wNTEwNjU0Mjk1MTc5NjhhL0Vaa2UtY3RhaWlaSGxURVBNSVU0UERVQmVsMFR6SExJdXVDc1h1bl9UbE9WdEE_ZT13c0QwS0g"
+                                            rel="noopener"
+                                            target="_blank"
+                                            sx={{ fontWeight: 600 }}
+                                        >
+                                            Resume (Korean)
+                                        </Link>
+                                    </div>
+                                </Paper>
+                            </Grid>
+                        </Grid>
+                        <Grid
+                            size={4}
+                            className={styles.simpleCard}
+                            sx={{ backgroundColor: "background.paper" }}
+                        >
+                            a
+                        </Grid>
+                        <Grid
+                            size={4}
+                            className={styles.simpleCard}
+                            sx={{ backgroundColor: "background.paper" }}
+                        >
+                            b
+                        </Grid>
+                        <Grid
+                            size={8}
+                            className={styles.simpleCard}
+                            sx={{ backgroundColor: "background.paper" }}
+                        >
+                            c
+                        </Grid>
+                    </Grid>
+                </main>
+            </div>
+        </ThemeProvider>
+    );
 }

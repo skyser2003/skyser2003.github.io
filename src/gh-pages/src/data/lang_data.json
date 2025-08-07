@@ -1,18 +1,18 @@
 {
     "name": {
         "ko": "장승호",
-        "en": "Seung Ho Jang"
+        "en": "Seung Ho, Jang"
     },
     "mlops": {
         "ko": "MLOps",
         "en": "MLOps"
     },
-    "ai_engineer": {
-        "ko": "AI Engineer",
-        "en": "AI Engineer"
+    "software_engineer": {
+        "ko": "소프트웨어 엔지니어",
+        "en": "Software Engineer"
     },
     "web_backend_developer": {
-        "ko": "Web Backend Developer",
+        "ko": "웹 백엔드 개발자",
         "en": "Web Backend Developer"
     }
 }
