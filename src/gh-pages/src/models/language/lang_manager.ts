@@ -26,7 +26,11 @@ class LanguageManager {
 
 let langCode = "en";
 
-const langMatch = window.navigator.language.match(langCodeRegex);
+let langMatch = null;
+
+if (typeof window !== "undefined") {
+    langMatch = window.navigator.language.match(langCodeRegex);
+}
 
 if (langMatch !== null) {
     langCode = langMatch[1];
