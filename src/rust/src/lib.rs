@@ -8,22 +8,6 @@ pub mod token_output_stream;
 
 pub use crate::token_output_stream::TokenOutputStream;
 
-#[wasm_bindgen]
-extern "C" {
-    pub fn alert(s: &str);
-}
-
-pub fn add(left: usize, right: usize) -> usize {
-    left + right
-}
-
-#[wasm_bindgen]
-pub fn greet(name: &str) -> String {
-    let result = &format!("Hello, {}!", name);
-
-    result.clone()
-}
-
 const DEFAULT_PROMPT: &str = "My favorite theorem is ";
 
 #[derive(Debug)]
@@ -431,16 +415,27 @@ mod tests {
 
     use crate::token_output_stream::TokenOutputStream;
 
-    #[test]
-    fn it_works() {
-        let result = add(2, 2);
-        assert_eq!(result, 4);
-    }
-
     #[tokio::test]
     async fn test_candle() -> anyhow::Result<()> {
-        let mut args = Args::parse();
-        args.which = Which::SmolLM2_360MInstruct;
+        let args = Args {
+            model: None,
+            prompt: Some(DEFAULT_PROMPT.to_string()),
+            sample_len: 100,
+            tokenizer: None,
+            temperature: 0.8,
+            top_p: None,
+            top_k: None,
+            seed: 42,
+            tracing: false,
+            verbose_prompt: false,
+            split_prompt: false,
+            cpu: true,
+            repeat_penalty: 1.1,
+            repeat_last_n: 64,
+            which: Which::SmolLM2_360MInstruct,
+            gqa: None,
+            force_dmmv: false,
+        };
 
         println!("{:?}", args);
 
