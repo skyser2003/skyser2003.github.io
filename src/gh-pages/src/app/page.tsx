@@ -178,8 +178,8 @@ export default function Home() {
             console.log("Tokenizer exists");
         }
 
-        console.log(modelData);
-        console.log(tokenizerData);
+        console.log("Model from rust: ", modelData);
+        console.log("Tokenizer from rust: ", tokenizerData);
 
         const request = window.indexedDB.open("model_store");
 
