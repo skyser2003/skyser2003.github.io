@@ -165,11 +165,6 @@ export default function Home() {
             Downloader.tokenizer_exists(),
         ]);
 
-        const [modelData, tokenizerData] = await Promise.all([
-            Downloader.get("model"),
-            Downloader.get("tokenizer"),
-        ]);
-
         if (modelExists === true) {
             console.log("Model exists");
         }
@@ -177,30 +172,6 @@ export default function Home() {
         if (tokenizerExists === true) {
             console.log("Tokenizer exists");
         }
-
-        console.log("Model from rust: ", modelData);
-        console.log("Tokenizer from rust: ", tokenizerData);
-
-        const request = window.indexedDB.open("model_store");
-
-        request.onsuccess = (event) => {
-            const db = event.target?.result;
-            const transaction = db.transaction("models", "readonly");
-            const store = transaction.objectStore("models");
-
-            const modelRequest = store.get("model");
-            const tokenizerRequest = store.get("tokenizer");
-
-            modelRequest.onsuccess = (event) => {
-                const model = event.target.result;
-                console.log("Model:", model);
-            };
-
-            tokenizerRequest.onsuccess = (event) => {
-                const tokenizer = event.target.result;
-                console.log("Tokenizer:", tokenizer);
-            };
-        };
 
         const downloaded = modelExists === true && tokenizerExists === true;
 

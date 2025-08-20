@@ -307,20 +307,19 @@ impl Downloader {
         }
 
         let store = store.unwrap();
-        let value = store.get(&JsValue::from_str(key));
+        let request = store.get(&JsValue::from_str(key));
 
-        if value.is_err() {
+        if request.is_err() {
             return false;
         }
 
-        let value = value.unwrap();
+        let request = request.unwrap();
 
-        console_log!("Checking existence of {}: {:?}", key, value);
-
-        value.is_array()
+        let data = Self::idbrequest_to_result::<Uint8Array>(&request).await;
+        data.is_ok()
     }
 
-    pub async fn get(key: &str) -> Option<JsValue> {
+    pub async fn get(key: &str) -> Option<Uint8Array> {
         let store_names: js_sys::Array = js_sys::Array::of1(&JsValue::from_str(STORE_NAME));
 
         let db = Self::open_db().await;
@@ -357,7 +356,7 @@ impl Downloader {
 
         let request = request.unwrap();
 
-        let data = request.result();
+        let data = Self::idbrequest_to_result::<Uint8Array>(&request).await;
 
         if data.is_err() {
             return None;
@@ -368,5 +367,42 @@ impl Downloader {
         } else {
             None
         }
+    }
+
+    async fn idbrequest_to_result<T: JsCast>(request: &web_sys::IdbRequest) -> Result<T, JsValue> {
+        let promise = Promise::new(&mut |resolve, reject| {
+            let on_success = Closure::once(move |event: Event| {
+                let target = event
+                    .target()
+                    .unwrap()
+                    .dyn_into::<web_sys::IdbRequest>()
+                    .unwrap();
+
+                let result = target.result().unwrap();
+                let result_js = result.as_ref();
+
+                resolve.call1(&JsValue::NULL, result_js).unwrap();
+            });
+
+            let on_fail = Closure::once(move |event: Event| {
+                let error = event
+                    .target()
+                    .unwrap()
+                    .dyn_into::<web_sys::IdbRequest>()
+                    .unwrap();
+                let error_js: &JsValue = error.as_ref();
+
+                reject.call1(&JsValue::NULL, error_js).unwrap();
+            });
+
+            request.set_onsuccess(Some(on_success.as_ref().unchecked_ref()));
+            request.set_onerror(Some(on_fail.as_ref().unchecked_ref()));
+
+            on_success.forget();
+            on_fail.forget();
+        });
+
+        let data: T = JsFuture::from(promise).await?.dyn_into()?;
+        Ok(data)
     }
 }
