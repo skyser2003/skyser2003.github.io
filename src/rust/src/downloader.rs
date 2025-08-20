@@ -379,7 +379,15 @@ impl Downloader {
                 resolve.call1(&JsValue::NULL, result_js).unwrap();
             });
 
+            let on_error = Closure::once(move |_: Event| {
+                reject.call1(&JsValue::NULL, &JsValue::NULL).unwrap();
+            });
+
             request.set_onsuccess(Some(on_success.as_ref().unchecked_ref()));
+            request.set_onerror(Some(on_error.as_ref().unchecked_ref()));
+
+            on_success.forget();
+            on_error.forget();
         });
 
         let data: T = JsFuture::from(promise).await?.dyn_into()?;
