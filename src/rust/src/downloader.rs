@@ -369,6 +369,47 @@ impl Downloader {
         }
     }
 
+    pub async fn remove(key: &str) -> bool {
+        let store_names: js_sys::Array = js_sys::Array::of1(&JsValue::from_str(STORE_NAME));
+
+        let db = Self::open_db().await;
+
+        if db.is_err() {
+            return false;
+        }
+
+        let db = db.unwrap();
+
+        let transaction = db.transaction_with_str_sequence_and_mode(
+            &store_names,
+            web_sys::IdbTransactionMode::Readwrite,
+        );
+
+        if transaction.is_err() {
+            return false;
+        }
+
+        let transaction = transaction.unwrap();
+
+        let store = transaction.object_store(STORE_NAME);
+
+        if store.is_err() {
+            return false;
+        }
+
+        let store = store.unwrap();
+        let request = store.delete(&JsValue::from_str(key));
+
+        if request.is_err() {
+            return false;
+        }
+        
+        let request = request.unwrap();
+
+        let result = Self::idbrequest_to_result::<JsValue>(&request).await;
+        result.is_ok()
+    }
+
     async fn idbrequest_to_result<T: JsCast>(request: &web_sys::IdbRequest) -> Result<T, JsValue> {
         let promise = Promise::new(&mut |resolve, reject| {
             let on_success = Closure::once(move |event: Event| {

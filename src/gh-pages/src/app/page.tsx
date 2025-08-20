@@ -89,6 +89,7 @@ export default function Home() {
     React.useEffect(() => {
         const loadModule = async () => {
             await modelsModule();
+            await Promise.all([checkDownloaded()]);
             setIsLoaded(true);
         };
 
@@ -110,6 +111,15 @@ export default function Home() {
     }
 
     const downloader = new Downloader("timinar/baby-llama-58m");
+
+    async function clearCache() {
+        const [modelRemoved, tokenizerRemoved] = await Promise.all([
+            Downloader.remove("model"),
+            Downloader.remove("tokenizer"),
+        ]);
+
+        setIsDownloaded(!(modelRemoved && tokenizerRemoved));
+    }
 
     async function downloadRepository() {
         const localIsDownloaded = await checkDownloaded();
@@ -165,15 +175,7 @@ export default function Home() {
             Downloader.tokenizer_exists(),
         ]);
 
-        if (modelExists === true) {
-            console.log("Model exists");
-        }
-
-        if (tokenizerExists === true) {
-            console.log("Tokenizer exists");
-        }
-
-        const downloaded = modelExists === true && tokenizerExists === true;
+        const downloaded = modelExists && tokenizerExists;
 
         setIsDownloaded(downloaded);
 
@@ -283,7 +285,14 @@ export default function Home() {
                             className={styles.simpleCard}
                             sx={{ backgroundColor: "background.paper" }}
                         >
-                            {isDownloading ? (
+                            {isDownloaded ? (
+                                <Button
+                                    variant="contained"
+                                    onClick={clearCache}
+                                >
+                                    Clear Cache
+                                </Button>
+                            ) : isDownloading ? (
                                 <CircularProgress />
                             ) : (
                                 !isDownloaded && (
