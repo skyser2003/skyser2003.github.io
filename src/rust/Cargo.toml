@@ -12,18 +12,41 @@ crate-type = ["cdylib", "rlib"]
 candle-core = { version = "0.9.1", default-features = false }
 candle-transformers = { version = "0.9.1", default-features = false }
 tokenizers = { version = "0.21.4", default-features = false, features = [
-	"fancy-regex",
+	"unstable_wasm",
 ] }
 anyhow = { version = "1.0.99" }
 clap = { version = "4.5.44", features = ["derive"] }
-hf-hub = { version = "0.4.3", default-features = false, features = [
-	"rustls-tls",
-	"ureq",
-] }
 js-sys = { version = "0.3.77", default-features = false }
 wasm-bindgen = { version = "0.2.100" }
+web-sys = { version = "0.3.77", default-features = false, features = [
+	"Storage",
+	"Window",
+	"IdbDatabase",
+	"IdbOpenDbRequest",
+	"IdbRequest",
+	"IdbTransaction",
+	"IdbObjectStore",
+	"IdbFactory",
+	"Event",
+	"Request",
+	"RequestInit",
+	"RequestMode",
+	"Response",
+	"Headers",
+	"Blob",
+	"ReadableStream",
+	"ReadableStreamDefaultReader",
+	"IdbTransactionMode",
+] }
+wasm-bindgen-futures = "0.4.38"
 getrandom_v2 = { version = "0.2", features = ["js"], package = "getrandom" }
 getrandom = { version = "0.3.3", features = ["wasm_js"] }
+candle-nn = "0.9.1"
+serde = { version = "1.0.219", default-features = false, features = ["derive"] }
+byteorder = { version = "1.5.0", default-features = false }
+yew-agent = { version = "0.2", default-features = false }
+yew = { version = "0.21.0", default-features = false, features = ["csr"] }
 
 [dev-dependencies]
-tokio = { version = "1.35.1", features = ["full"] }
+tokio = { version = "1.35.1", features = ["macros", "rt"] }
+wasm-bindgen-test = "0.3.50"

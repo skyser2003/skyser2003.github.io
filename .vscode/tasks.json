@@ -12,6 +12,30 @@
             "options": {
                 "cwd": "${workspaceFolder}/src/gh-pages"
             }
+        },
+        {
+            "label": "Rust: wasm-pack test",
+            "type": "shell",
+            "command": "wasm-pack test --chrome --headless --test browser_test -- --nocapture",
+            "group": {
+                "kind": "build"
+            },
+            "problemMatcher": ["$rustc"],
+            "options": {
+                "cwd": "${workspaceFolder}/src/rust"
+            }
+        },
+        {
+            "label": "Node: run dev",
+            "type": "shell",
+            "command": "npm run dev",
+            "group": {
+                "kind": "build"
+            },
+            "problemMatcher": ["$tsc"],
+            "options": {
+                "cwd": "${workspaceFolder}/src/gh-pages"
+            }
         }
     ]
 }

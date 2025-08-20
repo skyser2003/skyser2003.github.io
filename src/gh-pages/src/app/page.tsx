@@ -4,6 +4,8 @@ import * as React from "react";
 import styles from "./page.module.css";
 import Avatar from "@mui/material/Avatar";
 import {
+    Button,
+    CircularProgress,
     createTheme,
     CssBaseline,
     Grid,
@@ -13,6 +15,7 @@ import {
 } from "@mui/material";
 import { green } from "@mui/material/colors";
 import InitColorSchemeScript from "@mui/material/InitColorSchemeScript";
+import modelsModule, { Downloader } from "@/models/pkg";
 
 import langManager from "@/models/language/lang_manager";
 
@@ -75,9 +78,135 @@ const theme = createTheme({
 
 export default function Home() {
     const [language, setLanguage] = React.useState("");
+    const [isLoaded, setIsLoaded] = React.useState(false);
+    const [isDownloading, setIsDownloading] = React.useState(false);
+    const [isDownloaded, setIsDownloaded] = React.useState(false);
 
     if (language === "") {
         setLanguage(langManager.getLanguage());
+    }
+
+    React.useEffect(() => {
+        const loadModule = async () => {
+            await modelsModule();
+            setIsLoaded(true);
+        };
+
+        loadModule();
+    }, []);
+
+    if (!isLoaded) {
+        return (
+            <ThemeProvider theme={theme} defaultMode="system">
+                <InitColorSchemeScript defaultMode="system" attribute="class" />
+                <CssBaseline />
+                <div className={styles.page}>
+                    <main className={styles.main}>
+                        <div>Loading...</div>
+                    </main>
+                </div>
+            </ThemeProvider>
+        );
+    }
+
+    const downloader = new Downloader("timinar/baby-llama-58m");
+
+    async function downloadRepository() {
+        const localIsDownloaded = await checkDownloaded();
+
+        if (isDownloading) {
+            console.log("Currently downloading...");
+            return;
+        }
+
+        if (isDownloaded || localIsDownloaded) {
+            console.log("Already downloaded, skipping");
+            return;
+        }
+
+        const modelDownload = downloader.save_file(
+            "model.safetensors",
+            "model"
+        );
+        const tokenDownload = downloader.save_file(
+            "tokenizer.json",
+            "tokenizer"
+        );
+
+        setIsDownloading(true);
+
+        const [model, token] = await Promise.all([
+            modelDownload.start(),
+            tokenDownload.start(),
+        ]);
+
+        modelDownload.on(
+            "progress",
+            (filename, bytesReceived, totalBytes, percentage) => {
+                console.log(
+                    `Downloading ${filename}: ${bytesReceived} / ${totalBytes} (${percentage}%)`
+                );
+            }
+        );
+
+        modelDownload.on("complete", (filename) => {
+            console.log(`Download complete: ${filename}`);
+        });
+
+        await checkDownloaded();
+        setIsDownloading(false);
+
+        return [model, token];
+    }
+
+    async function checkDownloaded() {
+        const [modelExists, tokenizerExists] = await Promise.all([
+            Downloader.model_exists(),
+            Downloader.tokenizer_exists(),
+        ]);
+
+        const [modelData, tokenizerData] = await Promise.all([
+            Downloader.get("model"),
+            Downloader.get("tokenizer"),
+        ]);
+
+        if (modelExists === true) {
+            console.log("Model exists");
+        }
+
+        if (tokenizerExists === true) {
+            console.log("Tokenizer exists");
+        }
+
+        console.log(modelData);
+        console.log(tokenizerData);
+
+        const request = window.indexedDB.open("model_store");
+
+        request.onsuccess = (event) => {
+            const db = event.target?.result;
+            const transaction = db.transaction("models", "readonly");
+            const store = transaction.objectStore("models");
+
+            const modelRequest = store.get("model");
+            const tokenizerRequest = store.get("tokenizer");
+
+            modelRequest.onsuccess = (event) => {
+                const model = event.target.result;
+                console.log("Model:", model);
+            };
+
+            tokenizerRequest.onsuccess = (event) => {
+                const tokenizer = event.target.result;
+                console.log("Tokenizer:", tokenizer);
+            };
+        };
+
+        const downloaded = modelExists === true && tokenizerExists === true;
+
+        setIsDownloaded(downloaded);
+
+        return downloaded;
     }
 
     return (
@@ -183,7 +312,18 @@ export default function Home() {
                             className={styles.simpleCard}
                             sx={{ backgroundColor: "background.paper" }}
                         >
-                            a
+                            {isDownloading ? (
+                                <CircularProgress />
+                            ) : (
+                                !isDownloaded && (
+                                    <Button
+                                        variant="contained"
+                                        onClick={downloadRepository}
+                                    >
+                                        Download
+                                    </Button>
+                                )
+                            )}
                         </Grid>
                         <Grid
                             size={4}
