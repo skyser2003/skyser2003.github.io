@@ -349,15 +349,15 @@ impl Downloader {
         }
 
         let store = store.unwrap();
-        let value_request = store.get(&JsValue::from_str(key));
+        let request = store.get(&JsValue::from_str(key));
 
-        if value_request.is_err() {
+        if request.is_err() {
             return None;
         }
 
-        let value_request = value_request.unwrap();
+        let request = request.unwrap();
 
-        let data = Self::idbrequest_to_result::<JsValue>(&value_request).await;
+        let data = request.result();
 
         if data.is_err() {
             return None;
@@ -368,29 +368,5 @@ impl Downloader {
         } else {
             None
         }
-    }
-
-    async fn idbrequest_to_result<T: JsCast>(request: &web_sys::IdbRequest) -> Result<T, JsValue> {
-        let promise = Promise::new(&mut |resolve, reject| {
-            let on_success = Closure::once(move |event: Event| {
-                let result = event.target().unwrap().dyn_into::<T>().unwrap();
-                let result_js: &JsValue = result.as_ref();
-
-                resolve.call1(&JsValue::NULL, result_js).unwrap();
-            });
-
-            let on_error = Closure::once(move |_: Event| {
-                reject.call1(&JsValue::NULL, &JsValue::NULL).unwrap();
-            });
-
-            request.set_onsuccess(Some(on_success.as_ref().unchecked_ref()));
-            request.set_onerror(Some(on_error.as_ref().unchecked_ref()));
-
-            on_success.forget();
-            on_error.forget();
-        });
-
-        let data: T = JsFuture::from(promise).await?.dyn_into()?;
-        Ok(data)
     }
 }
