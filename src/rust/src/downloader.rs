@@ -403,7 +403,7 @@ impl Downloader {
         if request.is_err() {
             return false;
         }
-        
+
         let request = request.unwrap();
 
         let result = Self::idbrequest_to_result::<JsValue>(&request).await;
