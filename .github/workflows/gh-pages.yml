@@ -32,6 +32,7 @@ jobs:
             # Set the build directory for the Pages site
             SOURCE_DIR: ${{ github.workspace }}/src/gh-pages
             RUST_DIR: ${{ github.workspace }}/src/rust
+            CARGO_HOME: ${{ github.workspace }}/src/rust/.cargo
         defaults:
             run:
                 working-directory: ${{ env.SOURCE_DIR }}
