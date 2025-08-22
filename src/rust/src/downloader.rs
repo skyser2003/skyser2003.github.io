@@ -7,8 +7,6 @@ use web_sys::{
     RequestInit, RequestMode, Response,
 };
 
-use crate::console_log;
-
 #[wasm_bindgen(typescript_custom_section)]
 const TS_APPEND_CONTENT: &'static str = r#"
 export interface DownloadTask {
