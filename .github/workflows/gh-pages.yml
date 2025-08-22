@@ -89,6 +89,19 @@ jobs:
               run: cd ${{ env.SOURCE_DIR }} && ${{ steps.detect-package-manager.outputs.manager }} ${{ steps.detect-package-manager.outputs.command }}
             - name: Install dependencies (rust)
               run: rustup target add wasm32-unknown-unknown && cargo install wasm-pack
+            - name: Debug Cargo config resolution
+              run: |
+                  echo "=== Current directory ==="
+                  pwd
+                  echo "=== Rust directory ==="
+                  ls -la ${{ env.RUST_DIR }}
+                  echo "=== Looking for .cargo dirs ==="
+                  find ${{ github.workspace }} -name ".cargo" -type d
+                  echo "=== Cargo config locations cargo checks ==="
+                  cd ${{ env.RUST_DIR }}
+                  cargo config get target.wasm32-unknown-unknown || echo "No wasm32-unknown-unknown config found"
+                  echo "=== Environment ==="
+                  env | grep -E "(CARGO|RUST)" || echo "No CARGO/RUST env vars"
             - name: Build with Next.js
               run: cd ${{ env.SOURCE_DIR }} && ${{ steps.detect-package-manager.outputs.manager }} run build
             - name: Upload artifact
