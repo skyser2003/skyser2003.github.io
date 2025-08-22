@@ -88,7 +88,7 @@ jobs:
             - name: Install dependencies (node)
               run: cd ${{ env.SOURCE_DIR }} && ${{ steps.detect-package-manager.outputs.manager }} ${{ steps.detect-package-manager.outputs.command }}
             - name: Install dependencies (rust)
-              run: cargo install wasm-pack
+              run: rustup target add wasm32-unknown-unknown && cargo install wasm-pack
             - name: Build with Next.js
               run: cd ${{ env.SOURCE_DIR }} && ${{ steps.detect-package-manager.outputs.manager }} run build
             - name: Upload artifact
