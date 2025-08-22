@@ -32,9 +32,6 @@ jobs:
             # Set the build directory for the Pages site
             SOURCE_DIR: ${{ github.workspace }}/src/gh-pages
             RUST_DIR: ${{ github.workspace }}/src/rust
-        defaults:
-            run:
-                working-directory: ${{ env.SOURCE_DIR }}
         steps:
             - name: Checkout
               uses: actions/checkout@v4
