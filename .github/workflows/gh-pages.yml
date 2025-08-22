@@ -90,7 +90,7 @@ jobs:
             - name: Install dependencies (rust)
               run: cargo install wasm-pack
             - name: Build with Next.js
-              run: cd ${{ env.SOURCE_DIR }} && ${{ steps.detect-package-manager.outputs.manager }} run build
+              run: ls -alF ${{ env.RUST_DIR }} && ls -alF ${{ env.RUST_DIR }}/.cargo && cd ${{ env.SOURCE_DIR }} && ${{ steps.detect-package-manager.outputs.manager }} run build
             - name: Upload artifact
               uses: actions/upload-pages-artifact@v3
               with:
