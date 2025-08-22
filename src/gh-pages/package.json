@@ -5,7 +5,7 @@
     "scripts": {
         "dev": "next dev --turbopack --port 5000",
         "build": "npm run build-rust && next build",
-        "build-rust": "cd ../rust && wasm-pack build --target web && rm -rf ../gh-pages/src/models/pkg/ && mv pkg/ ../gh-pages/src/models/",
+        "build-rust": "cd ../rust && RUSTFLAGS=\"${RUSTFLAGS} --cfg getrandom_backend=\\\"wasm_js\\\"\" wasm-pack build --target web && rm -rf ../gh-pages/src/models/pkg/ && mv pkg/ ../gh-pages/src/models/",
         "start": "next start",
         "static": "npx serve@latest out",
         "lint": "next lint"

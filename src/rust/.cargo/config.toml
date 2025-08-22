@@ -1,2 +1,2 @@
-[target.wasm32-unknown-unknown.env]
-RUSTFLAGS = { value = "${RUSTFLAGS} --cfg getrandom_backend=\"wasm_js\"", force = true }
+[target.wasm32-unknown-unknown]
+rustflags = ['--cfg', 'getrandom_backend="wasm_js"']
