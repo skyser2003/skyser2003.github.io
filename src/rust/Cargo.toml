@@ -44,6 +44,7 @@ serde = { version = "1.0.219", default-features = false, features = ["derive"] }
 byteorder = { version = "1.5.0", default-features = false }
 yew-agent = { version = "0.2", default-features = false }
 yew = { version = "0.21.0", default-features = false, features = ["csr"] }
+safetensors = { version = "0.6.2", default-features = false }
 
 [dev-dependencies]
 tokio = { version = "1.35.1", features = ["macros", "rt"] }

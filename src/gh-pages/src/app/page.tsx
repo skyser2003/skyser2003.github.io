@@ -15,7 +15,7 @@ import {
 } from "@mui/material";
 import { green } from "@mui/material/colors";
 import InitColorSchemeScript from "@mui/material/InitColorSchemeScript";
-import modelsModule, { Downloader } from "@/models/pkg";
+import modelsModule, { Downloader, Generator } from "@/models/pkg";
 
 import langManager from "@/models/language/lang_manager";
 
@@ -145,7 +145,7 @@ export default function Home() {
 
         setIsDownloading(true);
 
-        const [model, token] = await Promise.all([
+        const [model, tokenizer] = await Promise.all([
             modelDownload.start(),
             tokenDownload.start(),
         ]);
@@ -166,7 +166,38 @@ export default function Home() {
         await checkDownloaded();
         setIsDownloading(false);
 
-        return [model, token];
+        await generate();
+
+        return [model, tokenizer];
+    }
+
+    async function generate() {
+        const modelDownload = downloader.save_file(
+            "model.safetensors",
+            "model"
+        );
+        const tokenDownload = downloader.save_file(
+            "tokenizer.json",
+            "tokenizer"
+        );
+
+        setIsDownloading(true);
+
+        const [model, tokenizer] = await Promise.all([
+            modelDownload.start(),
+            tokenDownload.start(),
+        ]);
+
+        const generator = new Generator(model, tokenizer);
+        const output = generator.init_with_prompt(
+            "Once upon a time, ",
+            1.0,
+            0.3,
+            0.5,
+            BigInt(65535)
+        );
+
+        console.log(output);
     }
 
     async function checkDownloaded() {
