@@ -47,6 +47,7 @@ yew = { version = "0.21.0", default-features = false, features = ["csr"] }
 safetensors = { version = "0.6.2", default-features = false, features = [
 	"alloc",
 ] }
+serde_json = { version = "1.0.143", default-features = false }
 
 [dev-dependencies]
 tokio = { version = "1.35.1", features = ["macros", "rt"] }

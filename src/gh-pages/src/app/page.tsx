@@ -15,7 +15,7 @@ import {
 } from "@mui/material";
 import { green } from "@mui/material/colors";
 import InitColorSchemeScript from "@mui/material/InitColorSchemeScript";
-import modelsModule, { Downloader } from "@/models/pkg";
+import modelsModule, { Downloader, Generator } from "@/models/pkg";
 
 import langManager from "@/models/language/lang_manager";
 
@@ -138,16 +138,20 @@ export default function Home() {
             "model.safetensors",
             "model"
         );
+
         const tokenDownload = downloader.save_file(
             "tokenizer.json",
             "tokenizer"
         );
 
+        const configDownload = downloader.save_file("config.json", "config");
+
         setIsDownloading(true);
 
-        const [model, tokenizer] = await Promise.all([
+        const [model, tokenizer, config] = await Promise.all([
             modelDownload.start(),
             tokenDownload.start(),
+            configDownload.start(),
         ]);
 
         modelDownload.on(
@@ -166,16 +170,26 @@ export default function Home() {
         await checkDownloaded();
         setIsDownloading(false);
 
-        return [model, tokenizer];
+        const generator = new Generator(model, tokenizer, config);
+
+        const startTime = performance.now();
+        const output = generator.generate("Once upon a time, ");
+        const endTime = performance.now();
+
+        console.log(output);
+        console.log(`Generation took ${endTime - startTime} ms`);
+
+        return [model, tokenizer, config];
     }
 
     async function checkDownloaded() {
-        const [modelExists, tokenizerExists] = await Promise.all([
+        const exists = await Promise.all([
             Downloader.model_exists(),
             Downloader.tokenizer_exists(),
+            Downloader.config_exists(),
         ]);
 
-        const downloaded = modelExists && tokenizerExists;
+        const downloaded = exists.every((e) => e);
 
         setIsDownloaded(downloaded);
 

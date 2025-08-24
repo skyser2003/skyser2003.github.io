@@ -276,6 +276,10 @@ impl Downloader {
         Self::exists("tokenizer").await
     }
 
+    pub async fn config_exists() -> bool {
+        Self::exists("config").await
+    }
+
     async fn exists(key: &str) -> bool {
         let store_names: js_sys::Array = js_sys::Array::of1(&JsValue::from_str(STORE_NAME));
 
