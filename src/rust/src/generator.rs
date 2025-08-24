@@ -85,10 +85,10 @@ impl Generator {
     }
 
     pub fn generate(&self, input: &str) -> String {
-        self.generate_inner(input).unwrap_or_default()
+        self.generate_inner(input).unwrap_or_default().0
     }
 
-    fn generate_inner(&self, input: &str) -> anyhow::Result<String> {
+    fn generate_inner(&self, input: &str) -> anyhow::Result<(String, i32)> {
         let args = &self.arguments;
 
         let mut tokenizer =
@@ -171,10 +171,11 @@ impl Generator {
                 all_generated.push_str(&t);
             }
         }
+
         if let Some(rest) = tokenizer.decode_rest().map_err(anyhow::Error::msg)? {
             all_generated.push_str(&rest);
         }
 
-        Ok(all_generated)
+        Ok((all_generated, token_generated))
     }
 }
