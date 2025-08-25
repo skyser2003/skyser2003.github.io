@@ -22,6 +22,7 @@ async fn test_wasm_api_download() -> Result<(), JsValue> {
 
 #[wasm_bindgen_test]
 async fn test_generator() -> Result<(), JsValue> {
+    use gh_pages_rust::generator::GeneratorCallback;
     use gh_pages_rust::{downloader::Downloader, generator::Generator};
 
     let downloader = Downloader::new("timinar/baby-llama-58m");
@@ -42,7 +43,7 @@ async fn test_generator() -> Result<(), JsValue> {
         .await?;
 
     let generator = Generator::new(model.to_vec(), tokenizer.to_vec(), config.to_vec(), None);
-    let output = generator.generate("Once upon a time, ");
+    let output = generator.generate("Once upon a time, ", None); // TODO: proper callback
 
     println!("{output}");
 

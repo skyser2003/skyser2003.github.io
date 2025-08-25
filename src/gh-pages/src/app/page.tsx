@@ -13,6 +13,7 @@ import {
     Link,
     Paper,
     ThemeProvider,
+    Typography,
 } from "@mui/material";
 import { green } from "@mui/material/colors";
 import InitColorSchemeScript from "@mui/material/InitColorSchemeScript";
@@ -187,8 +188,13 @@ export default function Home() {
     async function generateText() {
         const promptInputElement = document.getElementById(
             "prompt_input"
-        ) as HTMLInputElement | null;
-        const prompt = promptInputElement ? promptInputElement.value : "";
+        ) as HTMLInputElement;
+        const generatedTextElement = document.getElementById("generated_text")!;
+
+        const prompt = promptInputElement.value;
+
+        promptInputElement.value = "";
+        generatedTextElement.textContent = prompt;
 
         const data = await downloadRepository();
 
@@ -215,11 +221,16 @@ export default function Home() {
 
         const generator = new Generator(model, tokenizer, config);
 
+        console.log("Model loading done, begin generating...");
+
         const startTime = performance.now();
-        const output = generator.generate(prompt);
+
+        generator.generate(prompt, (token) => {
+            generatedTextElement.textContent += token;
+        });
+
         const endTime = performance.now();
 
-        console.log(output);
         console.log(`Generation took ${endTime - startTime} ms`);
     }
 
@@ -377,6 +388,18 @@ export default function Home() {
                                     >
                                         Submit
                                     </Button>
+                                </Grid>
+                                <Grid size={12}>
+                                    <Typography>
+                                        <pre
+                                            id="generated_text"
+                                            style={{
+                                                whiteSpace: "pre-wrap",
+                                                wordWrap: "break-word",
+                                                overflowWrap: "break-word",
+                                            }}
+                                        ></pre>
+                                    </Typography>
                                 </Grid>
                             </Grid>
                         </Grid>

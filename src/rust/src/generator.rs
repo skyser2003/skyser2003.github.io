@@ -4,11 +4,19 @@ use candle_transformers::{
     generation::{LogitsProcessor, Sampling},
     models::llama::{self as model, Config},
 };
+
 use model::{Llama, LlamaConfig};
 use tokenizers::Tokenizer;
 use wasm_bindgen::prelude::*;
 
 const EOS_TOKEN: &str = "</s>";
+
+#[wasm_bindgen]
+extern "C" {
+    #[wasm_bindgen(extends = js_sys::Function)]
+    #[wasm_bindgen(typescript_type = "(token: string) => void")]
+    pub type GeneratorCallback;
+}
 
 #[wasm_bindgen(getter_with_clone)]
 pub struct Arguments {
@@ -84,11 +92,23 @@ impl Generator {
         }
     }
 
-    pub fn generate(&self, input: &str) -> String {
-        self.generate_inner(input).unwrap_or_default().0
+    pub fn generate(&self, input: &str, callback: Option<GeneratorCallback>) -> String {
+        self.generate_inner(input, |output| {
+            if let Some(callback) = &callback {
+                callback
+                    .call1(&JsValue::NULL, &JsValue::from_str(output))
+                    .unwrap();
+            }
+        })
+        .unwrap_or_default()
+        .0
     }
 
-    fn generate_inner(&self, input: &str) -> anyhow::Result<(String, i32)> {
+    fn generate_inner(
+        &self,
+        input: &str,
+        callback: impl Fn(&str),
+    ) -> anyhow::Result<(String, i32)> {
         let args = &self.arguments;
 
         let mut tokenizer =
@@ -168,11 +188,13 @@ impl Generator {
                 _ => (),
             }
             if let Some(t) = tokenizer.next_token(next_token)? {
+                callback(&t);
                 all_generated.push_str(&t);
             }
         }
 
         if let Some(rest) = tokenizer.decode_rest().map_err(anyhow::Error::msg)? {
+            callback(&rest);
             all_generated.push_str(&rest);
         }
 
