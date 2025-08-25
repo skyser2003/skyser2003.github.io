@@ -154,7 +154,6 @@ impl Downloader {
         Ok(db)
     }
 
-    #[wasm_bindgen]
     pub fn save_file(&self, filename: &str, key: &str) -> DownloadTask {
         DownloadTask {
             downloader: Downloader {
