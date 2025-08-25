@@ -9,6 +9,7 @@ import {
     createTheme,
     CssBaseline,
     Grid,
+    Input,
     Link,
     Paper,
     ThemeProvider,
@@ -170,16 +171,56 @@ export default function Home() {
         await checkDownloaded();
         setIsDownloading(false);
 
+        return [model, tokenizer, config];
+    }
+
+    async function onPressEnter(
+        event: React.KeyboardEvent<HTMLInputElement | HTMLTextAreaElement>
+    ) {
+        if (event.key !== "Enter") {
+            return;
+        }
+
+        await generateText();
+    }
+
+    async function generateText() {
+        const promptInputElement = document.getElementById(
+            "prompt_input"
+        ) as HTMLInputElement | null;
+        const prompt = promptInputElement ? promptInputElement.value : "";
+
+        const data = await downloadRepository();
+
+        let model = data ? data[0] : undefined;
+        let tokenizer = data ? data[1] : undefined;
+        let config = data ? data[2] : undefined;
+
+        if (model === undefined) {
+            model = await Downloader.get("model");
+        }
+
+        if (tokenizer === undefined) {
+            tokenizer = await Downloader.get("tokenizer");
+        }
+
+        if (config === undefined) {
+            config = await Downloader.get("config");
+        }
+
+        if (!model || !tokenizer || !config) {
+            console.log("Model, tokenizer, or config not found");
+            return;
+        }
+
         const generator = new Generator(model, tokenizer, config);
 
         const startTime = performance.now();
-        const output = generator.generate("Once upon a time, ");
+        const output = generator.generate(prompt);
         const endTime = performance.now();
 
         console.log(output);
         console.log(`Generation took ${endTime - startTime} ms`);
-
-        return [model, tokenizer, config];
     }
 
     async function checkDownloaded() {
@@ -299,25 +340,45 @@ export default function Home() {
                             className={styles.simpleCard}
                             sx={{ backgroundColor: "background.paper" }}
                         >
-                            {isDownloaded ? (
-                                <Button
-                                    variant="contained"
-                                    onClick={clearCache}
-                                >
-                                    Clear Cache
-                                </Button>
-                            ) : isDownloading ? (
-                                <CircularProgress />
-                            ) : (
-                                !isDownloaded && (
+                            <Grid container>
+                                <Grid size={4}>
+                                    {isDownloaded ? (
+                                        <Button
+                                            variant="contained"
+                                            onClick={clearCache}
+                                        >
+                                            Clear Cache
+                                        </Button>
+                                    ) : isDownloading ? (
+                                        <CircularProgress />
+                                    ) : (
+                                        !isDownloaded && (
+                                            <Button
+                                                variant="contained"
+                                                onClick={downloadRepository}
+                                            >
+                                                Download
+                                            </Button>
+                                        )
+                                    )}
+                                </Grid>
+                                <Grid size={8}></Grid>
+                                <Grid size={8}>
+                                    <Input
+                                        id="prompt_input"
+                                        placeholder="Enter your prompt"
+                                        onKeyUp={onPressEnter}
+                                    />
+                                </Grid>
+                                <Grid size={4}>
                                     <Button
                                         variant="contained"
-                                        onClick={downloadRepository}
+                                        onClick={generateText}
                                     >
-                                        Download
+                                        Submit
                                     </Button>
-                                )
-                            )}
+                                </Grid>
+                            </Grid>
                         </Grid>
                         <Grid
                             size={4}
