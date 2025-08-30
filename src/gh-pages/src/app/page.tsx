@@ -17,7 +17,6 @@ import {
 } from "@mui/material";
 import { green } from "@mui/material/colors";
 import InitColorSchemeScript from "@mui/material/InitColorSchemeScript";
-import modelsModule, { Downloader, Generator } from "@/models/pkg";
 
 import langManager from "@/models/language/lang_manager";
 
@@ -80,9 +79,11 @@ const theme = createTheme({
 
 export default function Home() {
     const [language, setLanguage] = React.useState("");
-    const [isLoaded, setIsLoaded] = React.useState(false);
+    const [isWasmLoaded, setIsWasmLoaded] = React.useState(false);
+    const [isModelChecked, setIsModelChecked] = React.useState(false);
     const [isDownloading, setIsDownloading] = React.useState(false);
     const [isDownloaded, setIsDownloaded] = React.useState(false);
+    const [worker, setWorker] = React.useState<Worker | null>(null);
 
     if (language === "") {
         setLanguage(langManager.getLanguage());
@@ -90,15 +91,97 @@ export default function Home() {
 
     React.useEffect(() => {
         const loadModule = async () => {
-            await modelsModule();
-            await Promise.all([checkDownloaded()]);
-            setIsLoaded(true);
+            const localWorker = new Worker(
+                new URL("worker.ts", import.meta.url),
+                {
+                    type: "module",
+                }
+            );
+
+            let generatedTextElement: HTMLElement | null = null;
+
+            let generatedTextTailElement: HTMLElement | null = null;
+
+            localWorker.onmessage = (event) => {
+                const { data } = event;
+                const value = data.value;
+
+                (async () => {
+                    switch (data.type) {
+                        case "worker_ready":
+                            {
+                                localWorker.postMessage({
+                                    type: "check_model",
+                                });
+                            }
+                            break;
+                        case "model_checked":
+                            {
+                                setIsModelChecked(true);
+                                setIsDownloaded(true);
+                            }
+                            break;
+
+                        case "set_isdownloaded":
+                            {
+                                setIsDownloaded(value);
+                            }
+                            break;
+
+                        case "data_loaded":
+                            {
+                                setIsDownloading(false);
+                                setIsDownloaded(true);
+                            }
+                            break;
+
+                        case "text_generated":
+                            {
+                                if (generatedTextElement === null) {
+                                    generatedTextElement =
+                                        document.getElementById(
+                                            "generated_text"
+                                        )!;
+                                }
+
+                                if (generatedTextTailElement === null) {
+                                    generatedTextTailElement =
+                                        document.getElementById(
+                                            "generated_text_tail"
+                                        )!;
+                                }
+
+                                generatedTextElement.textContent += value;
+                                generatedTextTailElement.textContent =
+                                    "[continue...]";
+                            }
+                            break;
+
+                        case "text_generate_done":
+                            {
+                                if (generatedTextTailElement === null) {
+                                    generatedTextTailElement =
+                                        document.getElementById(
+                                            "generated_text_tail"
+                                        )!;
+                                }
+
+                                generatedTextTailElement.textContent = "[done]";
+                                console.log("Text generation done");
+                            }
+                            break;
+                    }
+                })();
+            };
+
+            setWorker(localWorker);
+            setIsWasmLoaded(true);
         };
 
         loadModule();
     }, []);
 
-    if (!isLoaded) {
+    if (!isWasmLoaded || !isModelChecked || !worker) {
         return (
             <ThemeProvider theme={theme} defaultMode="system">
                 <InitColorSchemeScript defaultMode="system" attribute="class" />
@@ -112,67 +195,13 @@ export default function Home() {
         );
     }
 
-    const downloader = new Downloader("timinar/baby-llama-58m");
-
     async function clearCache() {
-        const [modelRemoved, tokenizerRemoved] = await Promise.all([
-            Downloader.remove("model"),
-            Downloader.remove("tokenizer"),
-        ]);
-
-        setIsDownloaded(!(modelRemoved && tokenizerRemoved));
+        worker!.postMessage({ type: "clear_cache" });
     }
 
     async function downloadRepository() {
-        const localIsDownloaded = await checkDownloaded();
-
-        if (isDownloading) {
-            console.log("Currently downloading...");
-            return;
-        }
-
-        if (isDownloaded || localIsDownloaded) {
-            console.log("Already downloaded, skipping");
-            return;
-        }
-
-        const modelDownload = downloader.save_file(
-            "model.safetensors",
-            "model"
-        );
-
-        const tokenDownload = downloader.save_file(
-            "tokenizer.json",
-            "tokenizer"
-        );
-
-        const configDownload = downloader.save_file("config.json", "config");
-
         setIsDownloading(true);
-
-        const [model, tokenizer, config] = await Promise.all([
-            modelDownload.start(),
-            tokenDownload.start(),
-            configDownload.start(),
-        ]);
-
-        modelDownload.on(
-            "progress",
-            (filename, bytesReceived, totalBytes, percentage) => {
-                console.log(
-                    `Downloading ${filename}: ${bytesReceived} / ${totalBytes} (${percentage}%)`
-                );
-            }
-        );
-
-        modelDownload.on("complete", (filename) => {
-            console.log(`Download complete: ${filename}`);
-        });
-
-        await checkDownloaded();
-        setIsDownloading(false);
-
-        return [model, tokenizer, config];
+        worker!.postMessage({ type: "load_data" });
     }
 
     async function onPressEnter(
@@ -190,62 +219,21 @@ export default function Home() {
             "prompt_input"
         ) as HTMLInputElement;
         const generatedTextElement = document.getElementById("generated_text")!;
+        const generatedTextTailElement = document.getElementById(
+            "generated_text_tail"
+        )!;
 
         const prompt = promptInputElement.value;
 
-        promptInputElement.value = "";
-        generatedTextElement.textContent = prompt;
-
-        const data = await downloadRepository();
-
-        let model = data ? data[0] : undefined;
-        let tokenizer = data ? data[1] : undefined;
-        let config = data ? data[2] : undefined;
-
-        if (model === undefined) {
-            model = await Downloader.get("model");
-        }
-
-        if (tokenizer === undefined) {
-            tokenizer = await Downloader.get("tokenizer");
-        }
-
-        if (config === undefined) {
-            config = await Downloader.get("config");
-        }
-
-        if (!model || !tokenizer || !config) {
-            console.log("Model, tokenizer, or config not found");
+        if (prompt.trim() === "") {
             return;
         }
 
-        const generator = new Generator(model, tokenizer, config);
+        promptInputElement.value = "";
+        generatedTextElement.textContent = `${prompt}`;
+        generatedTextTailElement.textContent = "[waiting...]";
 
-        console.log("Model loading done, begin generating...");
-
-        const startTime = performance.now();
-
-        generator.generate(prompt, (token) => {
-            generatedTextElement.textContent += token;
-        });
-
-        const endTime = performance.now();
-
-        console.log(`Generation took ${endTime - startTime} ms`);
-    }
-
-    async function checkDownloaded() {
-        const exists = await Promise.all([
-            Downloader.model_exists(),
-            Downloader.tokenizer_exists(),
-            Downloader.config_exists(),
-        ]);
-
-        const downloaded = exists.every((e) => e);
-
-        setIsDownloaded(downloaded);
-
-        return downloaded;
+        worker!.postMessage({ type: "generate_text", value: prompt });
     }
 
     return (
@@ -400,6 +388,7 @@ export default function Home() {
                                             }}
                                         ></pre>
                                     </Typography>
+                                    <Typography id="generated_text_tail"></Typography>
                                 </Grid>
                             </Grid>
                         </Grid>

@@ -1,7 +1,11 @@
+use std::ops::Deref;
+
+use js_sys::global;
 use js_sys::{Promise, Uint8Array};
 use wasm_bindgen::prelude::*;
 use wasm_bindgen::JsCast;
 use wasm_bindgen_futures::JsFuture;
+use web_sys::DedicatedWorkerGlobalScope;
 use web_sys::{
     window, Event, IdbDatabase, IdbFactory, IdbOpenDbRequest, ReadableStreamDefaultReader, Request,
     RequestInit, RequestMode, Response,
@@ -104,7 +108,7 @@ impl Downloader {
     }
 
     async fn open_db() -> Result<IdbDatabase, JsValue> {
-        let window = window().ok_or(JsValue::from_str("No window available"))?;
+        let window = global().dyn_into::<DedicatedWorkerGlobalScope>()?;
         let indexed_db: IdbFactory = window
             .indexed_db()?
             .ok_or(JsValue::from_str("IndexedDB not supported"))?;
@@ -178,7 +182,7 @@ impl Downloader {
         opts.set_mode(RequestMode::Cors);
 
         let request = Request::new_with_str_and_init(&url, &opts)?;
-        let window = window().unwrap();
+        let window = global().dyn_into::<DedicatedWorkerGlobalScope>()?;
         let resp_value = JsFuture::from(window.fetch_with_request(&request)).await?;
         let resp: Response = resp_value.dyn_into()?;
 

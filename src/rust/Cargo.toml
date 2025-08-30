@@ -37,6 +37,7 @@ web-sys = { version = "0.3.77", default-features = false, features = [
 	"ReadableStream",
 	"ReadableStreamDefaultReader",
 	"IdbTransactionMode",
+	"DedicatedWorkerGlobalScope",
 ] }
 wasm-bindgen-futures = "0.4.38"
 candle-nn = "0.9.1"
