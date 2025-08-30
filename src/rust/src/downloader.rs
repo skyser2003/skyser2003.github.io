@@ -365,11 +365,7 @@ impl Downloader {
             return None;
         }
 
-        if let Ok(data) = data {
-            Some(data)
-        } else {
-            None
-        }
+        data.ok()
     }
 
     pub async fn remove(key: &str) -> bool {
