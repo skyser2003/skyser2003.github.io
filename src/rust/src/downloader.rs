@@ -1,5 +1,3 @@
-use std::ops::Deref;
-
 use js_sys::global;
 use js_sys::{Promise, Uint8Array};
 use wasm_bindgen::prelude::*;
@@ -7,7 +5,7 @@ use wasm_bindgen::JsCast;
 use wasm_bindgen_futures::JsFuture;
 use web_sys::DedicatedWorkerGlobalScope;
 use web_sys::{
-    window, Event, IdbDatabase, IdbFactory, IdbOpenDbRequest, ReadableStreamDefaultReader, Request,
+    Event, IdbDatabase, IdbFactory, IdbOpenDbRequest, ReadableStreamDefaultReader, Request,
     RequestInit, RequestMode, Response,
 };
 
