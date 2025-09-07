@@ -52,6 +52,42 @@
   padding: 16px;
 }
 
+/* Link rows with icons */
+.linkRow {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  line-height: 1.6;
+  margin: 6px 0;
+}
+
+
+/* Icon masks using external SVGs so they can inherit currentColor */
+.icon {
+  display: inline-block;
+  width: 20px;
+  height: 20px;
+  background-color: currentColor;
+  -webkit-mask-repeat: no-repeat;
+  mask-repeat: no-repeat;
+  -webkit-mask-position: center;
+  mask-position: center;
+  -webkit-mask-size: contain;
+  mask-size: contain;
+}
+.iconGithub {
+  -webkit-mask-image: url('/icons/github.svg');
+  mask-image: url('/icons/github.svg');
+}
+.iconLinkedin {
+  -webkit-mask-image: url('/icons/linkedin.svg');
+  mask-image: url('/icons/linkedin.svg');
+}
+.iconPdf {
+  -webkit-mask-image: url('/icons/pdf.svg');
+  mask-image: url('/icons/pdf.svg');
+}
+
 .simpleCard {
   border-radius: 16px;
   border: 2px solid #e0e0e0;

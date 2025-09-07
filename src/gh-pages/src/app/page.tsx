@@ -37,6 +37,18 @@ const theme = createTheme({
                     default: "#fafbfc",
                     paper: "#fff",
                 },
+                github: {
+                    main: "#181717",
+                    contrastText: "#ffffff",
+                },
+                linkedin: {
+                    main: "#0A66C2",
+                    contrastText: "#ffffff",
+                },
+                pdf: {
+                    main: "#D32F2F",
+                    contrastText: "#ffffff",
+                },
             },
         },
         dark: {
@@ -45,6 +57,18 @@ const theme = createTheme({
                 background: {
                     default: "#181a1b",
                     paper: "#23272b",
+                },
+                github: {
+                    main: "#e6edf3",
+                    contrastText: "#0d1117",
+                },
+                linkedin: {
+                    main: "#4C8ED6",
+                    contrastText: "#0d1117",
+                },
+                pdf: {
+                    main: "#EF5350",
+                    contrastText: "#0d1117",
                 },
             },
         },
@@ -291,43 +315,83 @@ export default function Home() {
                                     elevation={3}
                                     className={styles.linkCard}
                                 >
-                                    <div>
+                                    <div className={styles.linkRow}>
                                         <Link
                                             href="https://github.com/skyser2003"
                                             rel="noopener"
                                             target="_blank"
-                                            sx={{ fontWeight: 600 }}
+                                            sx={{
+                                                fontWeight: 600,
+                                                display: "inline-flex",
+                                                alignItems: "center",
+                                                gap: 1,
+                                                color: "github.main",
+                                            }}
                                         >
+                                            <span
+                                                className={`${styles.icon} ${styles.iconGithub}`}
+                                                aria-hidden="true"
+                                            ></span>
                                             GitHub
                                         </Link>
                                     </div>
-                                    <div>
+                                    <div className={styles.linkRow}>
                                         <Link
                                             href="https://www.linkedin.com/in/skyser2003/"
                                             rel="noopener"
                                             target="_blank"
-                                            sx={{ fontWeight: 600 }}
+                                            sx={{
+                                                fontWeight: 600,
+                                                display: "inline-flex",
+                                                alignItems: "center",
+                                                gap: 1,
+                                                color: "linkedin.main",
+                                            }}
                                         >
+                                            <span
+                                                className={`${styles.icon} ${styles.iconLinkedin}`}
+                                                aria-hidden="true"
+                                            ></span>
                                             LinkedIn
                                         </Link>
                                     </div>
-                                    <div>
+                                    <div className={styles.linkRow}>
                                         <Link
                                             href="https://onedrive.live.com/?cid=051065429517968a&id=051065429517968A!sf97af970a60940569b96e3831779c394&resid=051065429517968A!sf97af970a60940569b96e3831779c394&ithint=file,pdf&e=mrbR4m&migratedtospo=true&redeem=aHR0cHM6Ly8xZHJ2Lm1zL2IvYy8wNTEwNjU0Mjk1MTc5NjhhL0VYRDVldmtKcGxaQW01YmpneGQ1dzVRQi1nS3ZCTWZEd1k4QUhsUzY2YmdMdGc_ZT1tcmJSNG0"
                                             rel="noopener"
                                             target="_blank"
-                                            sx={{ fontWeight: 600 }}
+                                            sx={{
+                                                fontWeight: 600,
+                                                display: "inline-flex",
+                                                alignItems: "center",
+                                                gap: 1,
+                                                color: "pdf.main",
+                                            }}
                                         >
+                                            <span
+                                                className={`${styles.icon} ${styles.iconPdf}`}
+                                                aria-hidden="true"
+                                            ></span>
                                             Resume (English)
                                         </Link>
                                     </div>
-                                    <div>
+                                    <div className={styles.linkRow}>
                                         <Link
                                             href="https://onedrive.live.com/?cid=051065429517968a&id=051065429517968A!scbf91e998a5a472695310f3085383c35&resid=051065429517968A!scbf91e998a5a472695310f3085383c35&ithint=file,pdf&e=wsD0KH&migratedtospo=true&redeem=aHR0cHM6Ly8xZHJ2Lm1zL2IvYy8wNTEwNjU0Mjk1MTc5NjhhL0Vaa2UtY3RhaWlaSGxURVBNSVU0UERVQmVsMFR6SExJdXVDc1h1bl9UbE9WdEE_ZT13c0QwS0g"
                                             rel="noopener"
                                             target="_blank"
-                                            sx={{ fontWeight: 600 }}
+                                            sx={{
+                                                fontWeight: 600,
+                                                display: "inline-flex",
+                                                alignItems: "center",
+                                                gap: 1,
+                                                color: "pdf.main",
+                                            }}
                                         >
+                                            <span
+                                                className={`${styles.icon} ${styles.iconPdf}`}
+                                                aria-hidden="true"
+                                            ></span>
                                             Resume (Korean)
                                         </Link>
                                     </div>
