@@ -357,7 +357,7 @@ export default function Home() {
                                     </div>
                                     <div className={styles.linkRow}>
                                         <Link
-                                            href="https://onedrive.live.com/?cid=051065429517968a&id=051065429517968A!sf97af970a60940569b96e3831779c394&resid=051065429517968A!sf97af970a60940569b96e3831779c394&ithint=file,pdf&e=mrbR4m&migratedtospo=true&redeem=aHR0cHM6Ly8xZHJ2Lm1zL2IvYy8wNTEwNjU0Mjk1MTc5NjhhL0VYRDVldmtKcGxaQW01YmpneGQ1dzVRQi1nS3ZCTWZEd1k4QUhsUzY2YmdMdGc_ZT1tcmJSNG0"
+                                            href="/pdf/resume_eng.pdf"
                                             rel="noopener"
                                             target="_blank"
                                             sx={{
@@ -377,7 +377,7 @@ export default function Home() {
                                     </div>
                                     <div className={styles.linkRow}>
                                         <Link
-                                            href="https://onedrive.live.com/?cid=051065429517968a&id=051065429517968A!scbf91e998a5a472695310f3085383c35&resid=051065429517968A!scbf91e998a5a472695310f3085383c35&ithint=file,pdf&e=wsD0KH&migratedtospo=true&redeem=aHR0cHM6Ly8xZHJ2Lm1zL2IvYy8wNTEwNjU0Mjk1MTc5NjhhL0Vaa2UtY3RhaWlaSGxURVBNSVU0UERVQmVsMFR6SExJdXVDc1h1bl9UbE9WdEE_ZT13c0QwS0g"
+                                            href="/pdf/resume_kor.pdf"
                                             rel="noopener"
                                             target="_blank"
                                             sx={{
