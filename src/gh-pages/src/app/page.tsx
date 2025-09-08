@@ -442,17 +442,21 @@ export default function Home() {
                                     </Button>
                                 </Grid>
                                 <Grid size={12}>
-                                    <Typography>
+                                    <Typography component="div">
                                         <pre
                                             id="generated_text"
                                             style={{
                                                 whiteSpace: "pre-wrap",
                                                 wordWrap: "break-word",
                                                 overflowWrap: "break-word",
+                                                margin: 0,
                                             }}
                                         ></pre>
                                     </Typography>
-                                    <Typography id="generated_text_tail"></Typography>
+                                    <Typography
+                                        component="span"
+                                        id="generated_text_tail"
+                                    ></Typography>
                                 </Grid>
                             </Grid>
                         </Grid>
