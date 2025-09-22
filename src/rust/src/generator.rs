@@ -19,23 +19,65 @@ extern "C" {
 }
 
 #[wasm_bindgen(getter_with_clone)]
-pub struct Arguments {
+pub struct GenerationArguments {
+    pub seed: u64,
+    pub temperature: Option<f64>,
+    pub top_k: Option<usize>,
+    pub top_p: Option<f64>,
+    pub sample_len: Option<usize>,
+    pub repeat_penalty: Option<f32>,
+    pub repeat_last_n: Option<usize>,
+    pub no_kv_cache: bool,
+}
+
+pub struct GenerationArgumentsInternal {
+    pub seed: u64,
     pub temperature: f64,
     pub top_k: Option<usize>,
     pub top_p: Option<f64>,
-    pub seed: u64,
     pub sample_len: usize,
     pub repeat_penalty: f32,
     pub repeat_last_n: usize,
     pub no_kv_cache: bool,
-    pub dtype: String,
+}
+
+// Provide a constructor so JS can create an Arguments object and then mutate fields.
+#[wasm_bindgen]
+impl GenerationArguments {
+    #[wasm_bindgen(constructor)]
+    pub fn new() -> GenerationArguments {
+        GenerationArguments {
+            seed: 42,
+            temperature: Some(1.0),
+            top_k: Some(40),
+            top_p: None,
+            sample_len: Some(128),
+            repeat_penalty: Some(1.1),
+            repeat_last_n: Some(64),
+            no_kv_cache: false,
+        }
+    }
+}
+
+impl GenerationArguments {
+    pub fn get_internal(&self) -> GenerationArgumentsInternal {
+        GenerationArgumentsInternal {
+            seed: self.seed,
+            temperature: self.temperature.unwrap_or(1.0),
+            top_k: self.top_k,
+            top_p: self.top_p,
+            sample_len: self.sample_len.unwrap_or(128),
+            repeat_penalty: self.repeat_penalty.unwrap_or(1.0) as f32,
+            repeat_last_n: self.repeat_last_n.unwrap_or(64),
+            no_kv_cache: self.no_kv_cache,
+        }
+    }
 }
 
 #[wasm_bindgen]
 pub struct Generator {
     model: Llama,
     tokenizer: Tokenizer,
-    arguments: Arguments,
     config: Config,
     dtype: DType,
     device: Device,
@@ -48,35 +90,24 @@ impl Generator {
         model_bytes: Vec<u8>,
         tokenizer_bytes: Vec<u8>,
         config_bytes: Vec<u8>,
-        arguments: Option<Arguments>,
+        dtype: Option<String>,
     ) -> Self {
-        let arguments = arguments.unwrap_or(Arguments {
-            temperature: 1.0,
-            top_k: Some(40),
-            top_p: None,
-            seed: 42,
-            sample_len: 128,
-            repeat_penalty: 1.1,
-            repeat_last_n: 64,
-            no_kv_cache: false,
-            dtype: "".to_string(),
-        });
-
         let tokenizer = Tokenizer::from_bytes(tokenizer_bytes).unwrap();
 
         let config: LlamaConfig = serde_json::from_slice(&config_bytes).unwrap();
         let config = config.into_config(false);
 
         let device = Device::cuda_if_available(0).unwrap_or(Device::Cpu);
-        let dtype = match arguments.dtype.as_str() {
-            "f16" => DType::F16,
-            "bf16" => DType::BF16,
-            "f32" => DType::F32,
-            dtype => {
+        let dtype = match dtype.as_deref() {
+            Some("f16") => DType::F16,
+            Some("bf16") => DType::BF16,
+            Some("f32") => DType::F32,
+            Some(dtype) => {
                 println!("Error: wrong dtype {dtype}");
 
                 DType::F16
             }
+            None => DType::F16,
         };
 
         let vb = VarBuilder::from_buffered_safetensors(model_bytes, dtype, &device).unwrap();
@@ -85,15 +116,19 @@ impl Generator {
         Self {
             model,
             tokenizer,
-            arguments,
             config,
             dtype,
             device,
         }
     }
 
-    pub fn generate(&self, input: &str, callback: Option<GeneratorCallback>) -> String {
-        self.generate_inner(input, |output| {
+    pub fn generate(
+        &self,
+        input: &str,
+        arguments: Option<GenerationArguments>,
+        callback: Option<GeneratorCallback>,
+    ) -> String {
+        self.generate_inner(input, arguments, |output| {
             if let Some(callback) = &callback {
                 callback
                     .call1(&JsValue::NULL, &JsValue::from_str(output))
@@ -107,9 +142,12 @@ impl Generator {
     fn generate_inner(
         &self,
         input: &str,
+        arguments: Option<GenerationArguments>,
         callback: impl Fn(&str),
     ) -> anyhow::Result<(String, i32)> {
-        let args = &self.arguments;
+        let args = arguments
+            .unwrap_or_else(|| GenerationArguments::new())
+            .get_internal();
 
         let mut tokenizer =
             crate::token_output_stream::TokenOutputStream::new(self.tokenizer.clone());
@@ -126,6 +164,7 @@ impl Generator {
 
         let mut logits_processor = {
             let temperature = args.temperature;
+
             let sampling = if temperature <= 0. {
                 Sampling::ArgMax
             } else {
@@ -149,7 +188,11 @@ impl Generator {
         let mut token_generated = 0;
         let mut all_generated = String::new();
 
-        for index in 0..args.sample_len {
+        let sample_len = args.sample_len;
+        let repeat_penalty = args.repeat_penalty;
+        let repeat_last_n = args.repeat_last_n;
+
+        for index in 0..sample_len {
             let (context_size, context_index) = if cache.use_kv_cache && index > 0 {
                 (1, index_pos)
             } else {
@@ -160,13 +203,13 @@ impl Generator {
             let input = Tensor::new(ctxt, &self.device)?.unsqueeze(0)?;
             let logits = self.model.forward(&input, context_index, &mut cache)?;
             let logits = logits.squeeze(0)?;
-            let logits = if args.repeat_penalty == 1. {
+            let logits = if repeat_penalty == 1. {
                 logits
             } else {
-                let start_at = tokens.len().saturating_sub(args.repeat_last_n);
+                let start_at = tokens.len().saturating_sub(repeat_last_n);
                 candle_transformers::utils::apply_repeat_penalty(
                     &logits,
-                    args.repeat_penalty,
+                    repeat_penalty,
                     &tokens[start_at..],
                 )?
             };

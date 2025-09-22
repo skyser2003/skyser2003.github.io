@@ -14,6 +14,8 @@ import {
     Paper,
     ThemeProvider,
     Typography,
+    Select,
+    MenuItem,
 } from "@mui/material";
 import { green } from "@mui/material/colors";
 import InitColorSchemeScript from "@mui/material/InitColorSchemeScript";
@@ -108,6 +110,14 @@ export default function Home() {
     const [isDownloading, setIsDownloading] = React.useState(false);
     const [isDownloaded, setIsDownloaded] = React.useState(false);
     const [worker, setWorker] = React.useState<Worker | null>(null);
+    const [repository, setRepository] = React.useState(
+        "timinar/baby-llama-58m"
+    );
+    // Generation parameter states
+    const [temperature, setTemperature] = React.useState(1.0);
+    const [topK, setTopK] = React.useState<number | "">(10);
+    const [topP, setTopP] = React.useState<number | "">("");
+    const [sampleLen, setSampleLen] = React.useState(128);
 
     if (language === "") {
         setLanguage(langManager.getLanguage());
@@ -149,6 +159,12 @@ export default function Home() {
                         case "set_isdownloaded":
                             {
                                 setIsDownloaded(value);
+                            }
+                            break;
+                        case "repository_set":
+                            {
+                                setIsModelChecked(false);
+                                setIsDownloaded(false);
                             }
                             break;
 
@@ -257,7 +273,20 @@ export default function Home() {
         generatedTextElement.textContent = `${prompt}`;
         generatedTextTailElement.textContent = "[waiting...]";
 
-        worker!.postMessage({ type: "generate_text", value: prompt });
+        const args = {
+            temperature,
+            top_k: topK === "" ? null : topK,
+            top_p: topP === "" ? null : topP,
+            sample_len: sampleLen,
+        };
+
+        worker!.postMessage({
+            type: "generate_text",
+            value: {
+                prompt,
+                args,
+            },
+        });
     }
 
     return (
@@ -425,7 +454,123 @@ export default function Home() {
                                         )
                                     )}
                                 </Grid>
-                                <Grid size={8}></Grid>
+                                <Grid size={8}>
+                                    <Select
+                                        size="small"
+                                        value={repository}
+                                        onChange={(e) => {
+                                            const repo = e.target
+                                                .value as string;
+                                            setRepository(repo);
+                                            if (worker) {
+                                                worker.postMessage({
+                                                    type: "set_repository",
+                                                    value: repo,
+                                                });
+                                                worker.postMessage({
+                                                    type: "check_model",
+                                                });
+                                            }
+                                        }}
+                                        sx={{ minWidth: 260 }}
+                                    >
+                                        <MenuItem value="timinar/baby-llama-58m">
+                                            timinar/baby-llama-58m
+                                        </MenuItem>
+                                    </Select>
+                                </Grid>
+                                <Grid size={12}>
+                                    <Paper
+                                        elevation={1}
+                                        style={{ padding: 8, marginTop: 12 }}
+                                    >
+                                        <Typography
+                                            variant="subtitle2"
+                                            gutterBottom
+                                        >
+                                            Generation Params
+                                        </Typography>
+                                        <div
+                                            style={{
+                                                display: "flex",
+                                                flexWrap: "wrap",
+                                                gap: 8,
+                                            }}
+                                        >
+                                            <label style={{ fontSize: 12 }}>
+                                                Temp
+                                                <input
+                                                    type="number"
+                                                    step="0.01"
+                                                    min={0}
+                                                    style={{ width: 70 }}
+                                                    value={temperature}
+                                                    onChange={(e) =>
+                                                        setTemperature(
+                                                            parseFloat(
+                                                                e.target.value
+                                                            ) || 0
+                                                        )
+                                                    }
+                                                />
+                                            </label>
+                                            <label style={{ fontSize: 12 }}>
+                                                top_k
+                                                <input
+                                                    type="number"
+                                                    min={0}
+                                                    style={{ width: 70 }}
+                                                    value={topK}
+                                                    onChange={(e) => {
+                                                        const v =
+                                                            e.target.value;
+                                                        setTopK(
+                                                            v === ""
+                                                                ? ""
+                                                                : parseInt(v)
+                                                        );
+                                                    }}
+                                                />
+                                            </label>
+                                            <label style={{ fontSize: 12 }}>
+                                                top_p
+                                                <input
+                                                    type="number"
+                                                    step="0.01"
+                                                    min={0}
+                                                    max={1}
+                                                    style={{ width: 70 }}
+                                                    value={topP}
+                                                    onChange={(e) => {
+                                                        const v =
+                                                            e.target.value;
+                                                        setTopP(
+                                                            v === ""
+                                                                ? ""
+                                                                : parseFloat(v)
+                                                        );
+                                                    }}
+                                                />
+                                            </label>
+                                            <label style={{ fontSize: 12 }}>
+                                                length
+                                                <input
+                                                    type="number"
+                                                    min={1}
+                                                    style={{ width: 70 }}
+                                                    value={sampleLen}
+                                                    onChange={(e) =>
+                                                        setSampleLen(
+                                                            parseInt(
+                                                                e.target.value
+                                                            ) || 1
+                                                        )
+                                                    }
+                                                />
+                                            </label>
+                                        </div>
+                                    </Paper>
+                                </Grid>
                                 <Grid size={8}>
                                     <Input
                                         id="prompt_input"

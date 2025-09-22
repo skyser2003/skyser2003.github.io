@@ -1,6 +1,10 @@
 import path from "path";
 
-import initWasm, { Downloader, Generator } from "@/models/pkg/gh_pages_rust";
+import initWasm, {
+    Downloader,
+    Generator,
+    GenerationArguments,
+} from "@/models/pkg/gh_pages_rust";
 
 const wasmLocalPath = new URL(
     "@/models/pkg/gh_pages_rust_bg.wasm",
@@ -20,6 +24,15 @@ class Worker {
         this.generator = undefined;
         this._isDownloading = false;
         this._isDownloaded = false;
+    }
+
+    public setRepository(repository_name: string) {
+        if (repository_name === this.repository_name) return;
+        this.repository_name = repository_name;
+        this.downloader = new Downloader(repository_name);
+        this.generator = undefined;
+        this._isDownloading = false;
+        this.setIsDownloaded(false);
     }
 
     private get isDownloading() {
@@ -120,7 +133,8 @@ class Worker {
 
     public async generateText(
         prompt: string,
-        callback: (text: string) => void
+        callback: (text: string) => void,
+        args?: GenerationArguments
     ) {
         const data = await this.downloadRepository();
 
@@ -150,7 +164,7 @@ class Worker {
         console.log("Model loading done, begin generating...");
 
         const startTime = performance.now();
-        generator.generate(prompt, callback);
+        generator.generate(prompt, args, callback);
         const endTime = performance.now();
 
         console.log(`Generation took ${endTime - startTime} ms`);
@@ -187,16 +201,39 @@ initWasm(wasmFullPath).then(() => {
 
                 case "generate_text":
                     {
-                        await worker.generateText(value, (token) => {
-                            postMessage({
-                                type: "text_generated",
-                                value: token,
-                            });
-                        });
+                        const { prompt, args } = value;
+                        const genArgs = new GenerationArguments();
+                        genArgs.temperature = args.temperature;
+                        genArgs.top_k = args.top_k;
+                        genArgs.top_p = args.top_p;
+                        genArgs.sample_len = args.sample_len;
+
+                        await worker.generateText(
+                            prompt,
+                            (token) => {
+                                postMessage({
+                                    type: "text_generated",
+                                    value: token,
+                                });
+                            },
+                            genArgs
+                        );
 
                         postMessage({
                             type: "text_generate_done",
                         });
+                    }
+                    break;
+                case "set_repository":
+                    {
+                        worker.setRepository(value);
+                        postMessage({ type: "repository_set", value });
+                    }
+                    break;
+                case "clear_cache":
+                    {
+                        await worker.clearCache();
+                        postMessage({ type: "cache_cleared" });
                     }
                     break;
             }

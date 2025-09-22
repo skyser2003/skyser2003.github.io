@@ -43,7 +43,7 @@ async fn test_generator() -> Result<(), JsValue> {
         .await?;
 
     let generator = Generator::new(model.to_vec(), tokenizer.to_vec(), config.to_vec(), None);
-    let output = generator.generate("Once upon a time, ", None); // TODO: proper callback
+    let output = generator.generate("Once upon a time, ", None, None); // TODO: proper callback
 
     println!("{output}");
 
