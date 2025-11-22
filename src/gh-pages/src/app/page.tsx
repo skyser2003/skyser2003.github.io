@@ -157,11 +157,18 @@ export default function Home() {
                             }
                             break;
 
+                        case WorkerSendMessageType.SetIsDownloading:
+                            {
+                                setIsDownloading(value);
+                            }
+                            break;
+
                         case WorkerSendMessageType.SetIsDownloaded:
                             {
                                 setIsDownloaded(value);
                             }
                             break;
+
                         case WorkerSendMessageType.RepositorySet:
                             {
                                 setIsModelChecked(false);
