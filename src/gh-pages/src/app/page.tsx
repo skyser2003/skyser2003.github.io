@@ -116,8 +116,8 @@ export default function Home() {
     );
     // Generation parameter states
     const [temperature, setTemperature] = React.useState(1.0);
-    const [topK, setTopK] = React.useState<number | "">(10);
-    const [topP, setTopP] = React.useState<number | "">("");
+    const [topK, setTopK] = React.useState<number | string>(10);
+    const [topP, setTopP] = React.useState<number | string>(0.1);
     const [sampleLen, setSampleLen] = React.useState(128);
 
     if (language === "") {
@@ -153,7 +153,7 @@ export default function Home() {
                         case WorkerSendMessageType.ModelChecked:
                             {
                                 setIsModelChecked(true);
-                                setIsDownloaded(true);
+                                setIsDownloaded(value);
                             }
                             break;
 
