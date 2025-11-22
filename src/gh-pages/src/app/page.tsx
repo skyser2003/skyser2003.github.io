@@ -21,7 +21,7 @@ import { green } from "@mui/material/colors";
 import InitColorSchemeScript from "@mui/material/InitColorSchemeScript";
 
 import langManager from "@/models/language/lang_manager";
-import { WorkerSendMessageType, WorkerReceiveMessageType } from "./worker";
+import { WorkerSendMessageType, WorkerReceiveMessageType } from "./worker_enum";
 
 let defaultTheme = createTheme({});
 
