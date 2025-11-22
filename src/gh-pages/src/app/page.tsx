@@ -21,6 +21,7 @@ import { green } from "@mui/material/colors";
 import InitColorSchemeScript from "@mui/material/InitColorSchemeScript";
 
 import langManager from "@/models/language/lang_manager";
+import { WorkerSendMessageType, WorkerReceiveMessageType } from "./worker";
 
 let defaultTheme = createTheme({});
 
@@ -142,40 +143,40 @@ export default function Home() {
 
                 (async () => {
                     switch (data.type) {
-                        case "worker_ready":
+                        case WorkerSendMessageType.WorkerReady:
                             {
                                 localWorker.postMessage({
-                                    type: "check_model",
+                                    type: WorkerReceiveMessageType.CheckModel,
                                 });
                             }
                             break;
-                        case "model_checked":
+                        case WorkerSendMessageType.ModelChecked:
                             {
                                 setIsModelChecked(true);
                                 setIsDownloaded(true);
                             }
                             break;
 
-                        case "set_isdownloaded":
+                        case WorkerSendMessageType.SetIsDownloaded:
                             {
                                 setIsDownloaded(value);
                             }
                             break;
-                        case "repository_set":
+                        case WorkerSendMessageType.RepositorySet:
                             {
                                 setIsModelChecked(false);
                                 setIsDownloaded(false);
                             }
                             break;
 
-                        case "data_loaded":
+                        case WorkerSendMessageType.DataLoaded:
                             {
                                 setIsDownloading(false);
                                 setIsDownloaded(true);
                             }
                             break;
 
-                        case "text_generated":
+                        case WorkerSendMessageType.TextGenerated:
                             {
                                 if (generatedTextElement === null) {
                                     generatedTextElement =
@@ -197,7 +198,7 @@ export default function Home() {
                             }
                             break;
 
-                        case "text_generate_done":
+                        case WorkerSendMessageType.TextGenerateDone:
                             {
                                 if (generatedTextTailElement === null) {
                                     generatedTextTailElement =
@@ -236,12 +237,12 @@ export default function Home() {
     }
 
     async function clearCache() {
-        worker!.postMessage({ type: "clear_cache" });
+        worker!.postMessage({ type: WorkerReceiveMessageType.ClearCache });
     }
 
     async function downloadRepository() {
         setIsDownloading(true);
-        worker!.postMessage({ type: "load_data" });
+        worker!.postMessage({ type: WorkerReceiveMessageType.LoadData });
     }
 
     async function onPressEnter(
@@ -281,7 +282,7 @@ export default function Home() {
         };
 
         worker!.postMessage({
-            type: "generate_text",
+            type: WorkerReceiveMessageType.GenerateText,
             value: {
                 prompt,
                 args,
@@ -464,11 +465,11 @@ export default function Home() {
                                             setRepository(repo);
                                             if (worker) {
                                                 worker.postMessage({
-                                                    type: "set_repository",
+                                                    type: WorkerReceiveMessageType.SetRepository,
                                                     value: repo,
                                                 });
                                                 worker.postMessage({
-                                                    type: "check_model",
+                                                    type: WorkerReceiveMessageType.CheckModel,
                                                 });
                                             }
                                         }}

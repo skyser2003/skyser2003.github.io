@@ -11,6 +11,26 @@ const wasmLocalPath = new URL(
     import.meta.url
 ).toString();
 
+export enum WorkerSendMessageType {
+    SetIsDownloading = "set_isdownloading",
+    SetIsDownloaded = "set_isdownloaded",
+    ModelChecked = "model_checked",
+    DataLoaded = "data_loaded",
+    TextGenerated = "text_generated",
+    TextGenerateDone = "text_generate_done",
+    RepositorySet = "repository_set",
+    CacheCleared = "cache_cleared",
+    WorkerReady = "worker_ready",
+}
+
+export enum WorkerReceiveMessageType {
+    CheckModel = "check_model",
+    LoadData = "load_data",
+    GenerateText = "generate_text",
+    SetRepository = "set_repository",
+    ClearCache = "clear_cache",
+}
+
 class Worker {
     private repository_name: string;
     private downloader: Downloader;
@@ -45,12 +65,12 @@ class Worker {
 
     private setIsDownloading(value: boolean) {
         this._isDownloading = value;
-        postMessage({ type: "set_isdownloading", value });
+        postMessage({ type: WorkerSendMessageType.SetIsDownloading, value });
     }
 
     private setIsDownloaded(value: boolean) {
         this._isDownloaded = value;
-        postMessage({ type: "set_isdownloaded", value });
+        postMessage({ type: WorkerSendMessageType.SetIsDownloaded, value });
     }
 
     public async clearCache() {
@@ -182,24 +202,24 @@ initWasm(wasmFullPath).then(() => {
             const value = data.value;
 
             switch (data.type) {
-                case "check_model":
+                case WorkerReceiveMessageType.CheckModel:
                     {
                         const isDownloaded = await worker.checkDownloaded();
                         postMessage({
-                            type: "model_checked",
+                            type: WorkerSendMessageType.ModelChecked,
                             value: isDownloaded,
                         });
                     }
                     break;
 
-                case "load_data":
+                case WorkerReceiveMessageType.LoadData:
                     {
                         await worker.downloadRepository();
-                        postMessage({ type: "data_loaded" });
+                        postMessage({ type: WorkerSendMessageType.DataLoaded });
                     }
                     break;
 
-                case "generate_text":
+                case WorkerReceiveMessageType.GenerateText:
                     {
                         const { prompt, args } = value;
                         const genArgs = new GenerationArguments();
@@ -212,7 +232,7 @@ initWasm(wasmFullPath).then(() => {
                             prompt,
                             (token) => {
                                 postMessage({
-                                    type: "text_generated",
+                                    type: WorkerSendMessageType.TextGenerated,
                                     value: token,
                                 });
                             },
@@ -220,25 +240,31 @@ initWasm(wasmFullPath).then(() => {
                         );
 
                         postMessage({
-                            type: "text_generate_done",
+                            type: WorkerSendMessageType.TextGenerateDone,
                         });
                     }
                     break;
-                case "set_repository":
+                case WorkerReceiveMessageType.SetRepository:
                     {
                         worker.setRepository(value);
-                        postMessage({ type: "repository_set", value });
+                        postMessage({
+                            type: WorkerSendMessageType.RepositorySet,
+                            value,
+                        });
                     }
                     break;
-                case "clear_cache":
+
+                case WorkerReceiveMessageType.ClearCache:
                     {
                         await worker.clearCache();
-                        postMessage({ type: "cache_cleared" });
+                        postMessage({
+                            type: WorkerSendMessageType.CacheCleared,
+                        });
                     }
                     break;
             }
         })();
     };
 
-    postMessage({ type: "worker_ready" });
+    postMessage({ type: WorkerSendMessageType.WorkerReady });
 });
