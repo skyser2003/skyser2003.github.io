@@ -226,6 +226,7 @@ initWasm(wasmFullPath).then(() => {
                         });
                     }
                     break;
+
                 case WorkerReceiveMessageType.SetRepository:
                     {
                         worker.setRepository(value);
